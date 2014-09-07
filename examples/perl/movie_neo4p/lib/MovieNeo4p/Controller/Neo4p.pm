@@ -23,16 +23,19 @@ MATCH (movie:Movie)
  RETURN movie
 SEARCH
 
-  graph => REST::Neo4p::Query->new(<<GRAPH)
-MATCH (m:Movie)<-[:ACTED_IN]-(a:Person)
- RETURN m.title as movie, collect(a.name) as cast
- LIMIT {limit}
+  graph => REST::Neo4p::Query->new(<<GRAPH),
+MATCH (m:Movie)<-[r:ACTED_IN]-(a:Person)
+ RETURN m as movie, collect(a) as cast, collect(r) as r
 GRAPH
 
+  limit_graph => REST::Neo4p::Query->new(<<LGRAPH)
+MATCH (m:Movie)<-[r:ACTED_IN]-(a:Person)
+ RETURN m as movie, collect(a) as cast, collect(r) as r
+ LIMIT {limit}
+LGRAPH
 );
-while ( my ($k,$v) = each %Q ) {
-  $v->{ResponseAsObjects} = 0;
-}
+
+$Q{movie}->{ResponseAsObjects} = $Q{search}->{ResponseAsObjects} = 0;
 
 sub movie {
   my $self = shift;
@@ -46,7 +49,7 @@ sub movie {
     my $row = $Q{movie}->fetch;
     $Q{movie}->finish;
     if ($row) {
-      $self->render(text => encode_json { title => $$row[0], cast => $$row[1] }, 
+      $self->render(text => encode_json { title => $$row[0], cast => $$row[1] },
 		    format => 'json');
     }
     else {
@@ -54,7 +57,8 @@ sub movie {
     }
   } catch {
     if (ref) {
-      $self->render(text => $_->message, status => $_->code || 500);
+      $self->render(text => $_->message, format=>'txt',
+		    status => ref =~ /Neo4p/ ? $_->code || 500 : 500);
     }
     else {
       $self->render(text => $_, format=>'txt', status => 500);
@@ -86,8 +90,8 @@ sub search {
     }
   } catch {
     if (ref) {
-      $self->render(text => $_->message, format=>'txt',status => 
-		      ref =~ /Neo4p/ ? $_->code || 500 : 500);
+      $self->render(text => $_->message, format=>'txt',
+		    status => ref =~ /Neo4p/ ? $_->code || 500 : 500);
     }
     else {
       $self->render(text => $_, format=>'txt', status => 500);
@@ -97,7 +101,44 @@ sub search {
 
 sub graph {
   my $self = shift;
-  $self->render(text => "Yowza, graph!");
+  my $limit = $self->param('limit');
+  my $q = defined $limit ? $Q{limit_graph} : $Q{graph};
+  try {
+    my (@nodes,@links,@links_h);
+    my (%map);
+    my $i=0;
+    $q->execute( $limit ? {limit => $limit} : {} );
+    while (my $row = $q->fetch) {
+      foreach (@{$row->[2]}) {
+	push @links, $_->start_node->id, $_->end_node->id;
+      }
+      unless (defined $map{${$row->[0]}}) {
+	push @nodes, {title => $$row[0]->get_property('title'), label => 'movie'};
+	$map{${$row->[0]}} = $i++;
+      }
+      foreach (@{$row->[1]}) {
+	unless (defined $map{$$_}) {
+	  push @nodes, { title => $_->get_property('name'), label => 'actor'};
+	  $map{$$_} = $i++;
+	}
+      }
+      1;
+    }
+    $q->finish;
+    unless (@nodes) { # none found
+      $self->render(text=>'',status => 404);
+      return;
+    }
+    $_ = $map{$_} for @links;
+    for (my $i=0; $i<@links; $i+=2) {
+      push @links_h, { source => $links[$i], target => $links[$i+1] };
+    }
+    $self->render( text => encode_json { nodes => \@nodes, links => \@links_h },
+		   format => 'json');
+  } catch {
+      $self->render(text => $_->message, format=>'txt',
+		    status => ref =~ /Neo4p/ ? $_->code || 500 : 500);
+  }
 }
 
 1;
