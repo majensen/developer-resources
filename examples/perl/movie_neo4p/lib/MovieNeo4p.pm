@@ -26,7 +26,6 @@ sub startup {
   $r->get('/search')->to('neo4p#search');
   $r->get('/graph')->to('neo4p#graph');
   $r->get('/movie/:title')->to('neo4p#movie');
-  $r->get('/search/:query')->to('neo4p#search');
   $r->get('/graph/:parms')->to('neo4p#graph');
 }
 
