@@ -1,0 +1,33 @@
+package MovieNeo4p;
+use Mojo::Base 'Mojolicious';
+use REST::Neo4p;
+use Try::Tiny;
+
+# This method will run once at server start
+sub startup {
+  my $self = shift;
+
+  # Documentation browser under "/perldoc"
+  $self->plugin('PODRenderer');
+
+  try {
+    REST::Neo4p->connect($ENV{NEO4J_URL} || 'http://127.0.0.1:7474');
+  } catch {
+    ref $_ ? $_->rethrow : die $_;
+  };
+
+
+  # Router
+  my $r = $self->routes;
+
+  # Normal route to controller
+  $r->get('/')->to('example#welcome');
+  $r->get('/movie')->to('neo4p#movie');
+  $r->get('/search')->to('neo4p#search');
+  $r->get('/graph')->to('neo4p#graph');
+  $r->get('/movie/:title')->to('neo4p#movie');
+  $r->get('/search/:query')->to('neo4p#search');
+  $r->get('/graph/:parms')->to('neo4p#graph');
+}
+
+1;
