@@ -37,6 +37,12 @@ LGRAPH
 
 $Q{movie}->{ResponseAsObjects} = $Q{search}->{ResponseAsObjects} = 0;
 
+sub root {
+  my $self = shift;
+  my $info = { app => 'Movie-Neo4p', endpoints => ['movie','search','graph'] };
+  $self->render( text => encode_json $info, format => 'json' );
+}
+
 sub movie {
   my $self = shift;
   my $title = $self->stash('title');
@@ -75,7 +81,7 @@ sub search {
     return;
   }
   try {
-    $Q{search}->execute(query => $query);
+    $Q{search}->execute(query => "(?i).*$query.*");
     my $ret;
     while (my $row = $Q{search}->fetch) {
       delete $$row[0]->{_node};
