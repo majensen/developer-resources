@@ -14,10 +14,15 @@ my $build = Module::Build->new(
   },
   build_requires => {
     'Module::Build' => 0,
+    'Test::More' => 0,
+    'Test::Mojo' => 0,
+    'Try::Tiny' => 0
   },
   requires => {
     'Mojolicious' => '5.0',
-    'REST::Neo4p' => '0.3004'
+    'REST::Neo4p' => '0.3004',
+    'Try::Tiny' => 0,
+    'JSON' => '2'
   },
   meta_merge => {
     resources => {
