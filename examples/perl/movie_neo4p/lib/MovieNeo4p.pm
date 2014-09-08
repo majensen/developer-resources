@@ -11,7 +11,7 @@ sub startup {
   my $self = shift;
   $self->secrets(['furshlugginer','cowznofski']);
   $self->config( hypnotoad => {
-    listen => ['http://*:3000'],
+    listen => ['http://*:8080'],
   });
 
   try {
