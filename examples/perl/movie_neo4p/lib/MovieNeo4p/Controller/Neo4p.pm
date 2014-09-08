@@ -36,6 +36,9 @@ LGRAPH
 );
 
 $Q{movie}->{ResponseAsObjects} = $Q{search}->{ResponseAsObjects} = 0;
+while ( my ($k,$v) = each %Q ) {
+  $v->{RaiseError} = 1;
+}
 
 sub root {
   my $self = shift;
@@ -113,7 +116,9 @@ sub graph {
     my (@nodes,@links,@links_h);
     my (%map);
     my $i=0;
-    $q->execute( $limit ? {limit => $limit} : {} );
+    # note that $limit is numified - otherwise JSON will interpret as string
+    # leading to a Java exception at server:
+    $q->execute( $limit ? {limit => $limit+0} : {} );
     while (my $row = $q->fetch) {
       foreach (@{$row->[2]}) {
 	push @links, $_->start_node->id, $_->end_node->id;
