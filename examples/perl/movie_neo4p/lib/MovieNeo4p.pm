@@ -3,13 +3,16 @@ use Mojo::Base 'Mojolicious';
 use REST::Neo4p;
 use Try::Tiny;
 
+BEGIN {
+  $MovieNeo4p::VERSION='0.01';
+}
 # This method will run once at server start
 sub startup {
   my $self = shift;
   $self->secrets(['furshlugginer','cowznofski']);
-
-  # Documentation browser under "/perldoc"
-  $self->plugin('PODRenderer');
+  $self->config( hypnotoad => {
+    listen => ['http://*:3000'],
+  });
 
   try {
     REST::Neo4p->connect($ENV{NEO4J_URL} || 'http://127.0.0.1:7474');

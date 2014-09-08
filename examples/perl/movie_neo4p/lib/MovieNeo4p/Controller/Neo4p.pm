@@ -42,8 +42,7 @@ while ( my ($k,$v) = each %Q ) {
 
 sub root {
   my $self = shift;
-  my $info = { app => 'Movie-Neo4p', endpoints => ['movie','search','graph'] };
-  $self->render( text => encode_json $info, format => 'json' );
+  $self->render_static('index.html');
 }
 
 sub movie {

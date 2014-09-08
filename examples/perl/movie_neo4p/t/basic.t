@@ -19,9 +19,7 @@ try {
 
 SKIP : {
   skip 'Neo4j server not available, skipping tests', 1 unless $neo4j_available;
-  $t->get_ok('/')->status_is(200)->header_is('Content-Type' => 'application/json');
-  $t->json_like('/app' => qr/Movie-Neo4p/)->json_like('/endpoints/0',qr/movie/)->json_like('/endpoints/1',qr/search/)->json_like('/endpoints/2',qr/graph/);
-
+  $t->get_ok('/')->status_is(200)->content_like(qr/World's Leading Graph Database/);
   $t->get_ok('/movie')->status_is(400);
   $t->get_ok('/search')->status_is(400);
   $t->get_ok('/movie/The Matrix')->status_is(200)->header_is('Content-Type' => 'application/json')->json_has('/title')->json_has('/cast');
