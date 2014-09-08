@@ -17,7 +17,7 @@ my $build = Module::Build->new(
     'Test::More' => 0,
     'Test::Mojo' => 0,
     'Try::Tiny' => 0,
-    'List::MoreUtil' => 0
+    'List::MoreUtils' => 0
   },
   requires => {
     'Mojolicious' => '5.0',
