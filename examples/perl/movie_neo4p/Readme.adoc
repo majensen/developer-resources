@@ -34,13 +34,17 @@ which will create the ./Build script, and indicate any missing
 modules. You can install these with
 
 ----
-./Build --install-deps
+./Build --installdeps
 ----
 
 === Run locally:
 
 Start your local Neo4j Server (http://neo4j.com/download[Download & Install]), open the http://localhost:7474[Neo4j Browser].
 Then install the Movies data-set with `:play movies`, click the statement, and hit the triangular "Run" button.
+
+Copy the contents of
+https://github.com/neo4j-contrib/developer-resources/tree/gh-pages/examples/assets
+to ./public/assets
 
 Run tests in the source directory, if desired, with
 
