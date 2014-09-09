@@ -42,7 +42,7 @@ while ( my ($k,$v) = each %Q ) {
 
 sub root {
   my $self = shift;
-  $self->render_static('index.html');
+  $self->render_static('assets/index.html');
 }
 
 sub movie {
